@@ -3,42 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Calculator - Lab 3</title>
+    <title>Anas Bayoumy | Software Engineer</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <div class="calculator">
-        <h1>Calculator</h1>
-        
-        <div class="display-area">
-            <input type="text" id="display" readonly value="0">
-        </div>
+    <!-- Three.js Canvas -->
+    <canvas id="three-canvas"></canvas>
 
-        <div class="buttons">
-            <button class="btn num" data-value="7">7</button>
-            <button class="btn num" data-value="8">8</button>
-            <button class="btn num" data-value="9">9</button>
-            <button class="btn op" data-value="/">/</button>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-logo">AB</div>
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#education">Education</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button class="nav-toggle" id="navToggle">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
 
-            <button class="btn num" data-value="4">4</button>
-            <button class="btn num" data-value="5">5</button>
-            <button class="btn num" data-value="6">6</button>
-            <button class="btn op" data-value="*">*</button>
-
-            <button class="btn num" data-value="1">1</button>
-            <button class="btn num" data-value="2">2</button>
-            <button class="btn num" data-value="3">3</button>
-            <button class="btn op" data-value="-">-</button>
-
-            <button class="btn num" data-value="0">0</button>
-            <button class="btn num" data-value=".">.</button>
-            <button class="btn equals">=</button>
-            <button class="btn op" data-value="+">+</button>
-
-            <button class="btn clear">C</button>
-        </div>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <ul>
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#education">Education</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
     </div>
 
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="section hero-section">
+            <div class="hero-content">
+                <p class="hero-greeting">Hello, I'm</p>
+                <h1 class="hero-name">Anas Bayoumy</h1>
+                <div class="hero-title-wrapper">
+                    <span class="hero-title" id="typedText"></span>
+                    <span class="cursor">|</span>
+                </div>
+                <p class="hero-description">
+                    Software Engineer specializing in Full-stack Development, Cloud Infrastructure & DevOps.
+                    Currently building innovative solutions at BIAMI.io from Cairo, Egypt.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#contact" class="btn btn-primary">Get In Touch</a>
+                    <a href="#projects" class="btn btn-outline">View Projects</a>
+                </div>
+                <div class="hero-socials">
+                    <a href="https://www.linkedin.com/in/anasbayoumy" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://github.com/anasbayoumy" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="mailto:anasbayoumy20@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <div class="mouse">
+                    <div class="wheel"></div>
+                </div>
+                <p>Scroll Down</p>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section about-section">
+            <div class="container">
+                <h2 class="section-title">About Me</h2>
+                <div class="about-grid">
+                    <div class="about-text">
+                        <p>
+                            I'm a passionate Software Engineer based in Cairo, Egypt, currently working at
+                            <strong>BIAMI.io</strong> (London). With experience spanning full-stack development,
+                            cloud infrastructure, and DevOps, I bring a versatile skill set to every project.
+                        </p>
+                        <p>
+                            Previously, I worked at <strong>SOFINDEX</strong> as both a Software Engineer and
+                            Flutter Developer, and completed an internship at <strong>Credit Agricole Egypt</strong>.
+                            I'm pursuing dual degrees in Computer Software Engineering from the University of
+                            East London and Ain Shams University.
+                        </p>
+                        <p>
+                            I'm fluent in English and Arabic, certified in Software Testing (ISTQB), and always
+                            eager to learn new technologies and tackle complex engineering challenges.
+                        </p>
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat-card">
+                            <span class="stat-number" data-target="2">0</span><span class="stat-plus">+</span>
+                            <span class="stat-label">Years Experience</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" data-target="4">0</span><span class="stat-plus">+</span>
+                            <span class="stat-label">Companies</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" data-target="10">0</span><span class="stat-plus">+</span>
+                            <span class="stat-label">Projects Built</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" data-target="2">0</span>
+                            <span class="stat-label">Universities</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="section experience-section">
+            <div class="container">
+                <h2 class="section-title">Experience</h2>
+                <div class="timeline">
+                    <div class="timeline-item" data-aos="fade-right">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
+                            <div class="timeline-header">
+                                <h3>Software Engineer</h3>
+                                <span class="timeline-company">BIAMI.io</span>
+                            </div>
+                            <span class="timeline-date">Feb 2026 - Present</span>
+                            <span class="timeline-location">London Area, United Kingdom (Remote)</span>
+                            <p>Building scalable software solutions for a London-based company. Working across the full stack with cloud infrastructure and DevOps practices.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-aos="fade-left">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
+                            <div class="timeline-header">
+                                <h3>Software Engineer</h3>
+                                <span class="timeline-company">SOFINDEX</span>
+                            </div>
+                            <span class="timeline-date">Sep 2025 - Feb 2026</span>
+                            <span class="timeline-location">Remote</span>
+                            <p>Developed and maintained software solutions, working on backend systems, APIs, and infrastructure. Collaborated with cross-functional teams in an agile environment.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-aos="fade-right">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
+                            <div class="timeline-header">
+                                <h3>Flutter Developer</h3>
+                                <span class="timeline-company">SOFINDEX</span>
+                            </div>
+                            <span class="timeline-date">Apr 2025 - Aug 2025</span>
+                            <span class="timeline-location">Remote</span>
+                            <p>Designed and developed cross-platform mobile applications using Flutter and Dart. Implemented responsive UI components and integrated RESTful APIs.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" data-aos="fade-left">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card">
+                            <div class="timeline-header">
+                                <h3>Software Engineer Intern</h3>
+                                <span class="timeline-company">Credit Agricole Egypt</span>
+                            </div>
+                            <span class="timeline-date">Jul 2025 - Aug 2025</span>
+                            <span class="timeline-location">Egypt</span>
+                            <p>Gained hands-on experience in enterprise software development within the banking sector. Contributed to internal tools and learned industry best practices.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="section projects-section">
+            <div class="container">
+                <h2 class="section-title">Projects</h2>
+                <div class="projects-grid">
+                    <div class="project-card" data-aos="zoom-in">
+                        <div class="project-icon"><i class="fas fa-cloud"></i></div>
+                        <h3>Cloud Infrastructure Platform</h3>
+                        <p>Designed and deployed scalable cloud infrastructure with auto-scaling capabilities, CI/CD pipelines, and monitoring dashboards.</p>
+                        <div class="project-tags">
+                            <span>AWS</span><span>Terraform</span><span>Docker</span><span>Kubernetes</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/anasbayoumy" target="_blank"><i class="fab fa-github"></i> Code</a>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="zoom-in">
+                        <div class="project-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <h3>Cross-Platform Mobile App</h3>
+                        <p>Built a feature-rich mobile application using Flutter with clean architecture, state management, and seamless API integration.</p>
+                        <div class="project-tags">
+                            <span>Flutter</span><span>Dart</span><span>REST API</span><span>Firebase</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/anasbayoumy" target="_blank"><i class="fab fa-github"></i> Code</a>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="zoom-in">
+                        <div class="project-icon"><i class="fas fa-code"></i></div>
+                        <h3>Full-Stack Web Application</h3>
+                        <p>End-to-end web application with modern frontend framework, RESTful backend, database design, and authentication system.</p>
+                        <div class="project-tags">
+                            <span>React</span><span>Node.js</span><span>PostgreSQL</span><span>Docker</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/anasbayoumy" target="_blank"><i class="fab fa-github"></i> Code</a>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="zoom-in">
+                        <div class="project-icon"><i class="fas fa-server"></i></div>
+                        <h3>DevOps Pipeline Automation</h3>
+                        <p>Automated deployment pipelines with containerization, infrastructure as code, and monitoring for production environments.</p>
+                        <div class="project-tags">
+                            <span>Jenkins</span><span>Docker</span><span>Ansible</span><span>Prometheus</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/anasbayoumy" target="_blank"><i class="fab fa-github"></i> Code</a>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="zoom-in">
+                        <div class="project-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Software Testing Framework</h3>
+                        <p>Comprehensive testing framework aligned with ISTQB standards, including unit, integration, and end-to-end test suites.</p>
+                        <div class="project-tags">
+                            <span>Jest</span><span>Selenium</span><span>ISTQB</span><span>CI/CD</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/anasbayoumy" target="_blank"><i class="fab fa-github"></i> Code</a>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="zoom-in">
+                        <div class="project-icon"><i class="fas fa-desktop"></i></div>
+                        <h3>Enterprise Banking Tool</h3>
+                        <p>Internal tooling built during Credit Agricole internship, streamlining internal workflows and improving operational efficiency.</p>
+                        <div class="project-tags">
+                            <span>Java</span><span>Spring Boot</span><span>Oracle DB</span><span>REST</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/anasbayoumy" target="_blank"><i class="fab fa-github"></i> Code</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="section skills-section">
+            <div class="container">
+                <h2 class="section-title">Skills & Technologies</h2>
+                <div class="skills-categories">
+                    <div class="skill-category" data-aos="fade-up">
+                        <h3><i class="fas fa-laptop-code"></i> Frontend</h3>
+                        <div class="skill-tags">
+                            <span>React</span><span>Flutter</span><span>HTML5</span><span>CSS3</span>
+                            <span>JavaScript</span><span>TypeScript</span><span>Dart</span><span>Three.js</span>
+                        </div>
+                    </div>
+                    <div class="skill-category" data-aos="fade-up">
+                        <h3><i class="fas fa-server"></i> Backend</h3>
+                        <div class="skill-tags">
+                            <span>Node.js</span><span>Python</span><span>Java</span><span>Spring Boot</span>
+                            <span>REST APIs</span><span>GraphQL</span><span>Express.js</span>
+                        </div>
+                    </div>
+                    <div class="skill-category" data-aos="fade-up">
+                        <h3><i class="fas fa-cloud"></i> Cloud & DevOps</h3>
+                        <div class="skill-tags">
+                            <span>AWS</span><span>Docker</span><span>Kubernetes</span><span>Terraform</span>
+                            <span>CI/CD</span><span>Jenkins</span><span>Auto Scaling</span><span>Nginx</span>
+                        </div>
+                    </div>
+                    <div class="skill-category" data-aos="fade-up">
+                        <h3><i class="fas fa-database"></i> Databases</h3>
+                        <div class="skill-tags">
+                            <span>PostgreSQL</span><span>MongoDB</span><span>Firebase</span><span>Oracle DB</span>
+                            <span>Redis</span>
+                        </div>
+                    </div>
+                    <div class="skill-category" data-aos="fade-up">
+                        <h3><i class="fas fa-tools"></i> Architecture & Design</h3>
+                        <div class="skill-tags">
+                            <span>Software Design</span><span>Software Infrastructure</span><span>Microservices</span>
+                            <span>System Design</span><span>Clean Architecture</span><span>Design Patterns</span>
+                        </div>
+                    </div>
+                    <div class="skill-category" data-aos="fade-up">
+                        <h3><i class="fas fa-vial"></i> Testing</h3>
+                        <div class="skill-tags">
+                            <span>ISTQB</span><span>Unit Testing</span><span>Integration Testing</span>
+                            <span>Jest</span><span>Selenium</span><span>E2E Testing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education Section -->
+        <section id="education" class="section education-section">
+            <div class="container">
+                <h2 class="section-title">Education</h2>
+                <div class="education-grid">
+                    <div class="education-card" data-aos="flip-left">
+                        <div class="edu-icon"><i class="fas fa-university"></i></div>
+                        <h3>University of East London</h3>
+                        <p class="edu-degree">Engineer's degree, Computer Software Engineering</p>
+                        <p class="edu-date">October 2022 - June 2027</p>
+                    </div>
+                    <div class="education-card" data-aos="flip-right">
+                        <div class="edu-icon"><i class="fas fa-university"></i></div>
+                        <h3>Ain Shams University</h3>
+                        <p class="edu-degree">Bachelor of Engineering - BE, Computer Software Engineering</p>
+                        <p class="edu-date">September 2022 - June 2027</p>
+                    </div>
+                </div>
+
+                <h2 class="section-title" style="margin-top: 80px;">Certifications</h2>
+                <div class="certification-grid">
+                    <div class="cert-card" data-aos="fade-up">
+                        <div class="cert-icon"><i class="fas fa-certificate"></i></div>
+                        <h4>Software Testing and ISTQB</h4>
+                    </div>
+                    <div class="cert-card" data-aos="fade-up">
+                        <div class="cert-icon"><i class="fas fa-certificate"></i></div>
+                        <h4>CIB Summer Internship 2025</h4>
+                    </div>
+                </div>
+
+                <h2 class="section-title" style="margin-top: 80px;">Languages</h2>
+                <div class="languages-grid">
+                    <div class="lang-card" data-aos="fade-up">
+                        <span class="lang-name">English</span>
+                        <span class="lang-level">Professional Working</span>
+                        <div class="lang-bar"><div class="lang-fill" style="width: 85%"></div></div>
+                    </div>
+                    <div class="lang-card" data-aos="fade-up">
+                        <span class="lang-name">Arabic</span>
+                        <span class="lang-level">Native / Bilingual</span>
+                        <div class="lang-bar"><div class="lang-fill" style="width: 100%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section contact-section">
+            <div class="container">
+                <h2 class="section-title">Get In Touch</h2>
+                <p class="contact-intro">I'm always open to discussing new opportunities, interesting projects, or collaborations. Feel free to reach out!</p>
+                <div class="contact-grid">
+                    <a href="tel:+201022810077" class="contact-card">
+                        <i class="fas fa-phone"></i>
+                        <h4>Phone</h4>
+                        <p>+20 102 281 0077</p>
+                    </a>
+                    <a href="mailto:anasbayoumy20@gmail.com" class="contact-card">
+                        <i class="fas fa-envelope"></i>
+                        <h4>Email</h4>
+                        <p>anasbayoumy20@gmail.com</p>
+                    </a>
+                    <a href="https://www.linkedin.com/in/anasbayoumy" target="_blank" class="contact-card">
+                        <i class="fab fa-linkedin"></i>
+                        <h4>LinkedIn</h4>
+                        <p>linkedin.com/in/anasbayoumy</p>
+                    </a>
+                    <a href="https://github.com/anasbayoumy" target="_blank" class="contact-card">
+                        <i class="fab fa-github"></i>
+                        <h4>GitHub</h4>
+                        <p>github.com/anasbayoumy</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Anas Bayoumy. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
