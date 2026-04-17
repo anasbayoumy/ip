@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Lab 7 Report – Mini-Twitter REST API</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11pt;
+      color: #1a1a2e;
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    /* ── Cover Page ─────────────────────────────────────────────── */
+    .cover {
+      height: 100vh;
+      background: linear-gradient(135deg, #1da1f2 0%, #0d47a1 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-align: center;
+      padding: 60px 40px;
+      page-break-after: always;
+    }
+    .cover .bird svg { width: 80px; height: 80px; fill: #fff; margin-bottom: 24px; }
+    .cover h1 { font-size: 2.8rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -.02em; }
+    .cover h2 { font-size: 1.4rem; font-weight: 400; opacity: .9; margin-bottom: 40px; }
+    .cover .meta { background: rgba(255,255,255,.15); border-radius: 16px; padding: 28px 48px; }
+    .cover .meta p { font-size: 1.05rem; margin-bottom: 8px; }
+    .cover .meta .label { font-size: .8rem; opacity: .75; text-transform: uppercase; letter-spacing: .08em; }
+    .cover .meta .value { font-size: 1.1rem; font-weight: 700; }
+    .cover .divider { width: 60px; height: 3px; background: rgba(255,255,255,.4); margin: 20px auto; border-radius: 2px; }
+
+    /* ── Sections ───────────────────────────────────────────────── */
+    .page { padding: 48px 56px; }
+
+    h1.section { font-size: 1.6rem; font-weight: 800; color: #1da1f2; margin-bottom: 16px;
+                 padding-bottom: 10px; border-bottom: 3px solid #e8f5fd; }
+    h2.sub     { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin: 22px 0 10px; }
+    h3.sub2    { font-size: .95rem; font-weight: 700; color: #0d47a1; margin: 16px 0 8px; }
+
+    p { margin-bottom: 10px; }
+
+    ul, ol { margin: 8px 0 12px 24px; }
+    li { margin-bottom: 5px; }
+
+    /* ── Code blocks ────────────────────────────────────────────── */
+    pre {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 9pt;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.55;
+    }
+    code {
+      font-family: 'Fira Code', 'Courier New', monospace;
+      background: #e8f5fd;
+      color: #0d47a1;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: .9em;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    /* keyword colours */
+    .kw  { color: #c792ea; }
+    .str { color: #c3e88d; }
+    .fn  { color: #82aaff; }
+    .cm  { color: #546e7a; font-style: italic; }
+    .num { color: #f78c6c; }
+
+    /* ── Tables ─────────────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 9.5pt; }
+    th { background: #1da1f2; color: #fff; padding: 9px 12px; text-align: left; font-weight: 600; }
+    td { padding: 8px 12px; border-bottom: 1px solid #e1e8ed; }
+    tr:nth-child(even) td { background: #f7fbff; }
+
+    /* method badges */
+    .get    { background: #17bf63; color: #fff; padding: 2px 8px; border-radius: 5px; font-weight: 700; font-size: .8em; }
+    .post   { background: #1da1f2; color: #fff; padding: 2px 8px; border-radius: 5px; font-weight: 700; font-size: .8em; }
+    .delete { background: #e0245e; color: #fff; padding: 2px 8px; border-radius: 5px; font-weight: 700; font-size: .8em; }
+
+    /* ── Screenshot placeholders / mock screens ─────────────────── */
+    .screenshot {
+      border: 2px solid #ccd6dd;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 16px 0;
+      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+    }
+    .screenshot .bar {
+      background: #1da1f2;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      font-weight: 700;
+      font-size: .9rem;
+    }
+    .screenshot .bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .screenshot .bar .dot.r { background: #ff5f57; }
+    .screenshot .bar .dot.y { background: #ffbd2e; }
+    .screenshot .bar .dot.g { background: #28ca41; }
+    .screenshot .content { padding: 20px; background: #f0f2f5; min-height: 120px; }
+
+    /* ── Highlight box ───────────────────────────────────────────── */
+    .info-box {
+      background: #e8f5fd;
+      border-left: 4px solid #1da1f2;
+      border-radius: 0 10px 10px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: .95rem;
+    }
+
+    .success-box {
+      background: #e8faf0;
+      border-left: 4px solid #17bf63;
+      border-radius: 0 10px 10px 0;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: .95rem;
+    }
+
+    /* ── Page break ─────────────────────────────────────────────── */
+    .pb { page-break-before: always; }
+    .page-num { text-align: right; color: #aaa; font-size: 9pt; margin-top: 20px; }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      color: #657786;
+      font-size: 8.5pt;
+      padding: 20px;
+      border-top: 1px solid #e1e8ed;
+      margin-top: 30px;
+    }
+
+    /* ── UI mock ─────────────────────────────────────────────────── */
+    .ui-mock {
+      background: #f0f2f5;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 14px 0;
+      border: 1.5px solid #ccd6dd;
+    }
+    .tweet-mock {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .tweet-mock .author { font-weight: 700; color: #1da1f2; font-size: .9rem; }
+    .tweet-mock .content { font-size: .9rem; margin: 5px 0 8px; }
+    .tweet-mock .actions { font-size: .8rem; color: #657786; }
+
+    .user-mock {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .avatar-mock {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #1da1f2; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     COVER PAGE
+════════════════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="bird">
+    <svg viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+  </div>
+  <h1>Mini-Twitter REST API</h1>
+  <h2>Internet Programming — CSE341 &nbsp;|&nbsp; Lab 7</h2>
+  <div class="meta">
+    <div class="label">Student Name</div>
+    <div class="value">Anas Bayoumy</div>
+    <div class="divider"></div>
+    <div class="label">Student ID</div>
+    <div class="value">22p0011</div>
+    <div class="divider"></div>
+    <div class="label">Course</div>
+    <div class="value">CSE341 – Internet Programming</div>
+    <div class="divider"></div>
+    <div class="label">GitHub Repository</div>
+    <div class="value" style="font-size:.95rem">https://github.com/anasbayoumy/ip</div>
+    <div class="divider"></div>
+    <div class="label">Date</div>
+    <div class="value">April 17, 2026</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     1. INTRODUCTION
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page">
+  <h1 class="section">1. Introduction</h1>
+
+  <p>
+    This report documents the implementation of <strong>Lab 7</strong> for the course
+    <strong>CSE341 – Internet Programming</strong>. The objective of this lab is to build a
+    working backend server using <strong>Node.js</strong> and <strong>Express.js</strong> that
+    implements a REST API for a <em>Mini-Twitter</em> application, using JavaScript arrays and
+    objects as in-memory storage.
+  </p>
+
+  <h2 class="sub">1.1 Learning Objectives</h2>
+  <ul>
+    <li>Understand how Node.js enables server-side JavaScript execution via the V8 engine.</li>
+    <li>Learn Node.js's event-loop concurrency model and how it handles I/O without blocking.</li>
+    <li>Use Express.js to create a RESTful HTTP server with multiple endpoints.</li>
+    <li>Implement CRUD operations using in-memory JavaScript data structures.</li>
+    <li>Connect a browser-based frontend to the backend via the Fetch API.</li>
+  </ul>
+
+  <div class="info-box">
+    <strong>Repository:</strong> The full source code is available at
+    <strong>https://github.com/anasbayoumy/ip</strong> on the <code>lab7</code> branch.
+    Run <code>npm install &amp;&amp; npm start</code> to launch the server on port 3000.
+  </div>
+
+  <h2 class="sub">1.2 Technology Stack</h2>
+  <table>
+    <tr><th>Component</th><th>Technology</th><th>Purpose</th></tr>
+    <tr><td>Runtime</td><td>Node.js v24</td><td>JavaScript execution outside the browser</td></tr>
+    <tr><td>Framework</td><td>Express.js v5</td><td>HTTP server and routing</td></tr>
+    <tr><td>Middleware</td><td>CORS, express.json()</td><td>Cross-origin requests, JSON body parsing</td></tr>
+    <tr><td>Frontend</td><td>Vanilla JS + HTML5</td><td>Browser UI served by Express</td></tr>
+    <tr><td>Storage</td><td>JavaScript arrays</td><td>In-memory data (no database)</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     2. NODE.JS CONCEPTS
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+  <h1 class="section">2. Node.js Concepts</h1>
+
+  <h2 class="sub">2.1 What is Node.js?</h2>
+  <p>
+    Node.js is a cross-platform JavaScript runtime built on Chrome's <strong>V8 engine</strong>.
+    It allows developers to run JavaScript code on the server (machine) rather than only in the
+    browser. Unlike Python or Java programs that create new OS threads for concurrency, Node.js is
+    <strong>single-threaded</strong> but achieves concurrency through an <strong>event loop</strong>.
+  </p>
+
+  <h2 class="sub">2.2 The Event Loop &amp; Concurrency</h2>
+  <p>
+    When Node.js encounters a blocking call (disk I/O, network request, timer), it delegates the
+    task to <strong>libuv</strong> — a C library that manages a thread pool underneath. The main
+    JavaScript thread continues executing other code while libuv handles the slow operation.
+    When the operation finishes, a callback is pushed to the event queue and the event loop picks
+    it up and runs the continuation code.
+  </p>
+
+  <div class="info-box">
+    <strong>Key insight:</strong> Your JavaScript is single-threaded, but the I/O system under it
+    is multi-threaded. This lets Node handle thousands of concurrent requests efficiently.
+  </div>
+
+  <h3 class="sub2">Asynchronous file read example (from lecture)</h3>
+<pre><code><span class="kw">const</span> fs = <span class="fn">require</span>(<span class="str">"fs/promises"</span>);
+
+<span class="kw">async function</span> <span class="fn">run</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> data = <span class="kw">await</span> fs.<span class="fn">readFile</span>(<span class="str">"example.txt"</span>, <span class="str">"utf8"</span>);
+    console.<span class="fn">log</span>(<span class="str">"File contents:"</span>, data);
+  } <span class="kw">catch</span> (err) {
+    console.<span class="fn">log</span>(<span class="str">"Error:"</span>, err);
+  }
+}
+
+<span class="fn">run</span>();    <span class="cm">// Non-blocking – main thread stays free</span>
+</code></pre>
+
+  <h2 class="sub">2.3 Node vs. Browser</h2>
+  <table>
+    <tr><th>Feature</th><th>Browser</th><th>Node.js</th></tr>
+    <tr><td>Language</td><td>JavaScript</td><td>JavaScript</td></tr>
+    <tr><td>DOM APIs</td><td>Yes (document, window)</td><td>No</td></tr>
+    <tr><td>File system</td><td>Limited (FileReader)</td><td>Full access (fs module)</td></tr>
+    <tr><td>Network</td><td>fetch, XHR</td><td>http, https, net modules</td></tr>
+    <tr><td>Concurrency</td><td>Event loop (UI thread)</td><td>Event loop + libuv threads</td></tr>
+    <tr><td>Package manager</td><td>CDN / bundler</td><td>npm</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     3. REST API DESIGN
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+  <h1 class="section">3. REST API Design</h1>
+
+  <p>
+    The Mini-Twitter API models the core features of a social network: users, posts (tweets), likes,
+    comments, and follow relationships. All data is stored in JavaScript arrays/objects in memory.
+  </p>
+
+  <h2 class="sub">3.1 Data Models</h2>
+
+  <h3 class="sub2">User</h3>
+<pre><code>{ id: Number, username: String, email: String, createdAt: ISO8601 }</code></pre>
+
+  <h3 class="sub2">Post (Tweet)</h3>
+<pre><code>{ id: Number, userId: Number, content: String, createdAt: ISO8601 }</code></pre>
+
+  <h3 class="sub2">Comment</h3>
+<pre><code>{ id: Number, postId: Number, userId: Number, content: String, createdAt: ISO8601 }</code></pre>
+
+  <h3 class="sub2">Like</h3>
+<pre><code>{ postId: Number, userId: Number }</code></pre>
+
+  <h3 class="sub2">Follow</h3>
+<pre><code>{ followerId: Number, followedId: Number }</code></pre>
+
+  <h2 class="sub">3.2 Endpoints</h2>
+  <table>
+    <tr><th>Method</th><th>Path</th><th>Description</th><th>Body / Params</th></tr>
+    <tr><td><span class="post">POST</span></td><td>/users</td><td>Register a user</td><td>{ username, email }</td></tr>
+    <tr><td><span class="get">GET</span></td><td>/users</td><td>List all users</td><td>—</td></tr>
+    <tr><td><span class="get">GET</span></td><td>/users/:id</td><td>Get user by ID</td><td>:id</td></tr>
+    <tr><td><span class="post">POST</span></td><td>/users/:id/follow</td><td>Follow a user</td><td>{ followerId }</td></tr>
+    <tr><td><span class="delete">DELETE</span></td><td>/users/:id/follow</td><td>Unfollow a user</td><td>{ followerId }</td></tr>
+    <tr><td><span class="post">POST</span></td><td>/posts</td><td>Create a post</td><td>{ userId, content }</td></tr>
+    <tr><td><span class="get">GET</span></td><td>/posts</td><td>Get all posts</td><td>—</td></tr>
+    <tr><td><span class="get">GET</span></td><td>/posts/:id</td><td>Get post by ID</td><td>:id</td></tr>
+    <tr><td><span class="delete">DELETE</span></td><td>/posts/:id</td><td>Delete a post</td><td>:id</td></tr>
+    <tr><td><span class="post">POST</span></td><td>/posts/:id/like</td><td>Like a post</td><td>{ userId }</td></tr>
+    <tr><td><span class="delete">DELETE</span></td><td>/posts/:id/like</td><td>Unlike a post</td><td>{ userId }</td></tr>
+    <tr><td><span class="post">POST</span></td><td>/posts/:id/comments</td><td>Add a comment</td><td>{ userId, content }</td></tr>
+    <tr><td><span class="get">GET</span></td><td>/posts/:id/comments</td><td>Get post comments</td><td>:id</td></tr>
+  </table>
+
+  <h2 class="sub">3.3 HTTP Status Codes Used</h2>
+  <table>
+    <tr><th>Status</th><th>Meaning</th><th>When returned</th></tr>
+    <tr><td>200</td><td>OK</td><td>Successful GET or DELETE</td></tr>
+    <tr><td>201</td><td>Created</td><td>Resource successfully created (POST)</td></tr>
+    <tr><td>400</td><td>Bad Request</td><td>Missing required fields</td></tr>
+    <tr><td>404</td><td>Not Found</td><td>Resource does not exist</td></tr>
+    <tr><td>409</td><td>Conflict</td><td>Duplicate (already liked, already following)</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     4. IMPLEMENTATION
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+  <h1 class="section">4. Implementation</h1>
+
+  <h2 class="sub">4.1 Project Structure</h2>
+<pre><code>lab7/
+├── server.js        <span class="cm"># Express REST API — all 13 endpoints</span>
+├── index.html       <span class="cm"># Frontend SPA (Feed, Users, API Console tabs)</span>
+├── package.json     <span class="cm"># npm metadata and scripts</span>
+├── package-lock.json
+└── .gitignore</code></pre>
+
+  <h2 class="sub">4.2 Server Setup</h2>
+  <p>The server initialises Express, enables JSON parsing and CORS, then serves the static frontend:</p>
+<pre><code><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">"express"</span>);
+<span class="kw">const</span> cors    = <span class="fn">require</span>(<span class="str">"cors"</span>);
+<span class="kw">const</span> app     = <span class="fn">express</span>();
+
+app.<span class="fn">use</span>(cors());
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());
+app.<span class="fn">use</span>(express.<span class="fn">static</span>(<span class="str">"."</span>));   <span class="cm">// serves index.html</span>
+
+<span class="cm">// In-memory storage</span>
+<span class="kw">let</span> users    = [];
+<span class="kw">let</span> posts    = [];
+<span class="kw">let</span> comments = [];
+<span class="kw">let</span> likes    = [];
+<span class="kw">let</span> follows  = [];
+
+app.<span class="fn">listen</span>(<span class="num">3000</span>, () =&gt; console.<span class="fn">log</span>(<span class="str">"Server running on http://localhost:3000"</span>));</code></pre>
+
+  <h2 class="sub">4.3 Key Endpoint Implementations</h2>
+
+  <h3 class="sub2">POST /posts — Create a Tweet</h3>
+<pre><code>app.<span class="fn">post</span>(<span class="str">"/posts"</span>, (req, res) =&gt; {
+  <span class="kw">const</span> { userId, content } = req.body;
+  <span class="kw">if</span> (!userId || !content)
+    <span class="kw">return</span> <span class="fn">badRequest</span>(res, <span class="str">"userId and content are required"</span>);
+  <span class="kw">if</span> (!users.<span class="fn">find</span>(u =&gt; u.id === userId))
+    <span class="kw">return</span> <span class="fn">notFound</span>(res, <span class="str">"User not found"</span>);
+
+  <span class="kw">const</span> post = { id: postIdCounter++, userId, content, createdAt: <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toISOString</span>() };
+  posts.<span class="fn">push</span>(post);
+  console.<span class="fn">log</span>(<span class="str">`Adding new post ${JSON.stringify(post)}`</span>);
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>(post);
+});</code></pre>
+
+  <h3 class="sub2">POST /posts/:id/like — Like a Post</h3>
+<pre><code>app.<span class="fn">post</span>(<span class="str">"/posts/:id/like"</span>, (req, res) =&gt; {
+  <span class="kw">const</span> postId = parseInt(req.params.id);
+  <span class="kw">const</span> { userId } = req.body;
+
+  <span class="kw">const</span> already = likes.<span class="fn">find</span>(l =&gt; l.postId === postId &amp;&amp; l.userId === userId);
+  <span class="kw">if</span> (already) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">409</span>).<span class="fn">json</span>({ error: <span class="str">"Already liked"</span> });
+
+  likes.<span class="fn">push</span>({ postId, userId });
+  res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>({
+    message: <span class="str">"Post liked"</span>,
+    likesCount: likes.<span class="fn">filter</span>(l =&gt; l.postId === postId).length
+  });
+});</code></pre>
+
+  <h3 class="sub2">GET /posts — Retrieve All Posts with Enrichment</h3>
+<pre><code>app.<span class="fn">get</span>(<span class="str">"/posts"</span>, (req, res) =&gt; {
+  <span class="kw">const</span> result = posts.<span class="fn">map</span>(p =&gt; <span class="fn">enrichPost</span>(p));
+  res.<span class="fn">json</span>(result);
+});
+
+<span class="kw">function</span> <span class="fn">enrichPost</span>(post) {
+  <span class="kw">const</span> author = users.<span class="fn">find</span>(u =&gt; u.id === post.userId);
+  <span class="kw">return</span> {
+    ...post,
+    author: author ? author.username : <span class="str">"unknown"</span>,
+    likesCount:    likes.<span class="fn">filter</span>(l =&gt; l.postId === post.id).length,
+    commentsCount: comments.<span class="fn">filter</span>(c =&gt; c.postId === post.id).length,
+  };
+}</code></pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     5. FRONTEND
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+  <h1 class="section">5. Frontend Application</h1>
+
+  <p>
+    The frontend is a single-page application (SPA) delivered by Express via
+    <code>express.static(".")</code>. It is entirely self-contained in <code>index.html</code> and
+    communicates with the backend using the browser's <code>fetch()</code> API.
+  </p>
+
+  <h2 class="sub">5.1 UI Structure — Three Tabs</h2>
+
+  <table>
+    <tr><th>Tab</th><th>Features</th></tr>
+    <tr><td>Feed</td><td>Select user, compose tweet, display timeline with like/comment actions</td></tr>
+    <tr><td>Users</td><td>Register new users, follow/unfollow, view follower/following counts</td></tr>
+    <tr><td>API Console</td><td>Send raw HTTP requests (method, path, JSON body), view response, endpoint reference table</td></tr>
+  </table>
+
+  <h2 class="sub">5.2 Mock UI Screenshot — Feed Tab</h2>
+  <div class="screenshot">
+    <div class="bar">
+      <div class="dot r"></div>
+      <div class="dot y"></div>
+      <div class="dot g"></div>
+      <span>localhost:3000 — Mini-Twitter</span>
+    </div>
+    <div class="content">
+      <div style="background:#fff;border-radius:10px;padding:12px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.1)">
+        <div style="font-size:.85rem;font-weight:700;color:#1da1f2;margin-bottom:8px">New Post</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="flex:1;height:32px;background:#f0f2f5;border-radius:8px;border:1.5px solid #ccd6dd;display:flex;align-items:center;padding:0 10px;font-size:.82rem;color:#657786">@alice ▼</div>
+        </div>
+        <div style="height:55px;background:#f0f2f5;border-radius:8px;border:1.5px solid #ccd6dd;display:flex;align-items:center;padding:10px;font-size:.82rem;color:#657786">What's happening?</div>
+        <div style="margin-top:8px;width:70px;height:28px;background:#1da1f2;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;font-weight:700">Tweet</div>
+      </div>
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:#657786;margin-bottom:10px">Timeline</div>
+      <div class="tweet-mock">
+        <div class="author">@bob</div>
+        <div class="content">Learning Node.js and Express today! 🚀</div>
+        <div class="actions">♡ 2 &nbsp;&nbsp; 💬 1 &nbsp;&nbsp; 🗑</div>
+      </div>
+      <div class="tweet-mock">
+        <div class="author">@alice</div>
+        <div class="content">Hello Twitter world! #CSE341</div>
+        <div class="actions">♡ 1 &nbsp;&nbsp; 💬 0 &nbsp;&nbsp; 🗑</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sub">5.3 Mock UI Screenshot — Users Tab</h2>
+  <div class="screenshot">
+    <div class="bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span>Mini-Twitter — Users</span>
+    </div>
+    <div class="content">
+      <div style="background:#fff;border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.1)">
+        <div style="font-size:.85rem;font-weight:700;color:#1da1f2;margin-bottom:8px">Register User</div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;height:32px;background:#f0f2f5;border-radius:8px;border:1.5px solid #ccd6dd;display:flex;align-items:center;padding:0 10px;font-size:.82rem;color:#657786">Username</div>
+          <div style="flex:1;height:32px;background:#f0f2f5;border-radius:8px;border:1.5px solid #ccd6dd;display:flex;align-items:center;padding:0 10px;font-size:.82rem;color:#657786">Email</div>
+          <div style="width:80px;height:32px;background:#1da1f2;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;font-weight:700">Register</div>
+        </div>
+      </div>
+      <div class="user-mock">
+        <div class="avatar-mock">A</div>
+        <div>
+          <div style="font-weight:700;font-size:.9rem">@alice</div>
+          <div style="font-size:.78rem;color:#657786">alice@example.com</div>
+          <div style="font-size:.78rem;color:#657786"><strong>1</strong> Following &nbsp; <strong>0</strong> Followers</div>
+        </div>
+        <div style="margin-left:auto;background:#e8f5fd;color:#1da1f2;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:700">ID: 1</div>
+      </div>
+      <div class="user-mock">
+        <div class="avatar-mock">B</div>
+        <div>
+          <div style="font-weight:700;font-size:.9rem">@bob</div>
+          <div style="font-size:.78rem;color:#657786">bob@example.com</div>
+          <div style="font-size:.78rem;color:#657786"><strong>0</strong> Following &nbsp; <strong>1</strong> Followers</div>
+        </div>
+        <div style="margin-left:auto;background:#e8f5fd;color:#1da1f2;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:700">ID: 2</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     6. API DEMO (curl output)
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+  <h1 class="section">6. API Demonstration</h1>
+  <p>The following shows the actual server responses captured via <code>curl</code> during testing.</p>
+
+  <h2 class="sub">POST /users — Register Alice</h2>
+<pre><code>$ curl -X POST http://localhost:3000/users \
+       -H "Content-Type: application/json" \
+       -d '{"username":"alice","email":"alice@example.com"}'
+
+<span class="num">HTTP 201</span>
+{
+  <span class="str">"id"</span>: 1,
+  <span class="str">"username"</span>: <span class="str">"alice"</span>,
+  <span class="str">"email"</span>: <span class="str">"alice@example.com"</span>,
+  <span class="str">"createdAt"</span>: <span class="str">"2026-04-17T20:11:39.179Z"</span>
+}</code></pre>
+
+  <h2 class="sub">POST /posts — Create a Tweet</h2>
+<pre><code>$ curl -X POST http://localhost:3000/posts \
+       -H "Content-Type: application/json" \
+       -d '{"userId":1,"content":"Hello Twitter world! #CSE341"}'
+
+<span class="num">HTTP 201</span>
+{
+  <span class="str">"id"</span>: 1,
+  <span class="str">"userId"</span>: 1,
+  <span class="str">"content"</span>: <span class="str">"Hello Twitter world! #CSE341"</span>,
+  <span class="str">"createdAt"</span>: <span class="str">"2026-04-17T20:11:39.264Z"</span>
+}</code></pre>
+
+  <h2 class="sub">GET /posts — Retrieve All Posts (enriched)</h2>
+<pre><code>$ curl http://localhost:3000/posts
+
+<span class="num">HTTP 200</span>
+[
+  {
+    <span class="str">"id"</span>: 1, <span class="str">"userId"</span>: 1, <span class="str">"content"</span>: <span class="str">"Hello Twitter world! #CSE341"</span>,
+    <span class="str">"createdAt"</span>: <span class="str">"2026-04-17T20:11:39.264Z"</span>,
+    <span class="str">"author"</span>: <span class="str">"alice"</span>, <span class="str">"likesCount"</span>: 0, <span class="str">"commentsCount"</span>: 0
+  },
+  {
+    <span class="str">"id"</span>: 2, <span class="str">"userId"</span>: 2, <span class="str">"content"</span>: <span class="str">"Learning Node.js and Express today!"</span>,
+    <span class="str">"createdAt"</span>: <span class="str">"2026-04-17T20:11:39.292Z"</span>,
+    <span class="str">"author"</span>: <span class="str">"bob"</span>, <span class="str">"likesCount"</span>: 0, <span class="str">"commentsCount"</span>: 0
+  }
+]</code></pre>
+
+  <h2 class="sub">POST /posts/1/like — Like a Post</h2>
+<pre><code>$ curl -X POST http://localhost:3000/posts/1/like \
+       -H "Content-Type: application/json" \
+       -d '{"userId":2}'
+
+<span class="num">HTTP 201</span>
+{ <span class="str">"message"</span>: <span class="str">"Post liked"</span>, <span class="str">"likesCount"</span>: 1 }</code></pre>
+
+  <h2 class="sub">POST /users/2/follow — Follow a User</h2>
+<pre><code>$ curl -X POST http://localhost:3000/users/2/follow \
+       -H "Content-Type: application/json" \
+       -d '{"followerId":1}'
+
+<span class="num">HTTP 201</span>
+{ <span class="str">"message"</span>: <span class="str">"User 1 now follows user 2"</span> }</code></pre>
+
+  <h2 class="sub">GET /users — Users with follower counts</h2>
+<pre><code>$ curl http://localhost:3000/users
+
+<span class="num">HTTP 200</span>
+[
+  { <span class="str">"id"</span>:1, <span class="str">"username"</span>:<span class="str">"alice"</span>, <span class="str">"followersCount"</span>:0, <span class="str">"followingCount"</span>:1 },
+  { <span class="str">"id"</span>:2, <span class="str">"username"</span>:<span class="str">"bob"</span>,   <span class="str">"followersCount"</span>:1, <span class="str">"followingCount"</span>:0 }
+]</code></pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     7. API CONSOLE SCREENSHOT
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+  <h1 class="section">7. API Console Screenshot</h1>
+  <p>
+    The built-in API Console tab allows sending raw HTTP requests to the server directly from the
+    browser, similar to Postman.
+  </p>
+
+  <div class="screenshot">
+    <div class="bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span>Mini-Twitter — API Console</span>
+    </div>
+    <div class="content" style="padding:16px">
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.1)">
+        <div style="font-size:.85rem;font-weight:700;color:#1da1f2;margin-bottom:10px">API Console</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <div style="width:80px;height:32px;background:#f0f2f5;border-radius:8px;border:1.5px solid #ccd6dd;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:#1da1f2;font-weight:700">POST ▼</div>
+          <div style="flex:1;height:32px;background:#f0f2f5;border-radius:8px;border:1.5px solid #1da1f2;display:flex;align-items:center;padding:0 10px;font-size:.82rem;color:#1a3a5c">/posts/1/like</div>
+          <div style="width:60px;height:32px;background:#1da1f2;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;font-weight:700">Send</div>
+        </div>
+        <div style="height:50px;background:#f0f2f5;border-radius:8px;border:1.5px solid #ccd6dd;display:flex;align-items:center;padding:0 10px;font-size:.8rem;color:#657786;font-family:monospace;margin-bottom:10px">{"userId":2}</div>
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#657786;margin-bottom:6px">Response</div>
+        <div style="background:#f0f7ff;border:1.5px solid #b3d9f7;border-radius:8px;padding:10px;font-family:monospace;font-size:.78rem;color:#1a3a5c">
+          HTTP 201<br>
+          {<br>
+          &nbsp;&nbsp;"message": "Post liked",<br>
+          &nbsp;&nbsp;"likesCount": 1<br>
+          }
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);margin-top:14px">
+        <div style="font-size:.85rem;font-weight:700;color:#1da1f2;margin-bottom:8px">Endpoints Reference</div>
+        <table style="font-size:.75rem">
+          <tr>
+            <td style="padding:4px 6px"><span class="post">POST</span></td>
+            <td style="padding:4px 6px;font-family:monospace">/users</td>
+            <td style="padding:4px 6px;color:#657786">Register a new user</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px"><span class="get">GET</span></td>
+            <td style="padding:4px 6px;font-family:monospace">/posts</td>
+            <td style="padding:4px 6px;color:#657786">Get all posts</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px"><span class="delete">DELETE</span></td>
+            <td style="padding:4px 6px;font-family:monospace">/posts/:id</td>
+            <td style="padding:4px 6px;color:#657786">Delete a post</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     8. CONCLUSION
+════════════════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+  <h1 class="section">8. Conclusion</h1>
+
+  <p>
+    This lab successfully demonstrated how to build a complete backend REST API using
+    <strong>Node.js</strong> and <strong>Express.js</strong>. The implementation covers all the
+    core concepts taught in Lab 7:
+  </p>
+
+  <ul>
+    <li>Running JavaScript on the server using Node.js and the V8 engine.</li>
+    <li>Understanding Node's event-loop concurrency model (non-blocking I/O via libuv).</li>
+    <li>Creating a web server with Express and defining GET, POST, and DELETE endpoints.</li>
+    <li>Using <code>req.params</code>, <code>req.body</code>, and <code>res.json()</code> to handle requests.</li>
+    <li>Adding middleware (<code>express.json()</code>, CORS) to process incoming requests.</li>
+    <li>Implementing full CRUD operations using in-memory JavaScript arrays.</li>
+    <li>Building a frontend SPA that consumes the API via the browser's <code>fetch()</code>.</li>
+  </ul>
+
+  <div class="success-box">
+    <strong>All 13 REST endpoints are implemented and tested.</strong> The server handles edge
+    cases: duplicate registrations (409), missing fields (400), and not-found resources (404).
+    Data relationships (likes, follows, comments) are maintained consistently across all endpoints.
+  </div>
+
+  <h2 class="sub">GitHub Repository</h2>
+  <p>Full source code is available at:</p>
+  <div class="info-box" style="font-size:1rem">
+    <strong>https://github.com/anasbayoumy/ip</strong> &nbsp;—&nbsp; branch: <code>lab7</code>
+    <br><br>
+    To run locally:
+    <pre style="background:transparent;color:#1a3a5c;padding:0;margin-top:8px;font-size:.9rem"><code>git clone https://github.com/anasbayoumy/ip.git
+cd ip
+git checkout lab7
+npm install
+npm start        # → http://localhost:3000</code></pre>
+  </div>
+
+  <div class="footer">
+    Mini-Twitter REST API &nbsp;|&nbsp; Anas Bayoumy (22p0011) &nbsp;|&nbsp;
+    CSE341 Internet Programming &nbsp;|&nbsp; Lab 7 &nbsp;|&nbsp; April 2026
+  </div>
+</div>
+
+</body>
+</html>
