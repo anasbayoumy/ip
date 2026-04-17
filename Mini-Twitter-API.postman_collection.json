@@ -1,0 +1,470 @@
+{
+  "info": {
+    "_postman_id": "cse341-lab7-mini-twitter",
+    "name": "Mini-Twitter API — CSE341 Lab 7",
+    "description": "Complete REST API collection for the Mini-Twitter backend built with Node.js and Express. Covers Users, Posts, Likes, Comments, and Follow/Unfollow endpoints.\n\nStudent: Anas Bayoumy | ID: 22p0011\nRepo: https://github.com/anasbayoumy/ip (branch: lab7)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Register User — Alice",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 1,\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"createdAt\": \"2026-04-17T20:24:58.263Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register User — Bob",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"bob\",\n  \"email\": \"bob@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 2,\n  \"username\": \"bob\",\n  \"email\": \"bob@example.com\",\n  \"createdAt\": \"2026-04-17T20:24:58.270Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register User — Charlie",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"charlie\",\n  \"email\": \"charlie@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 3,\n  \"username\": \"charlie\",\n  \"email\": \"charlie@example.com\",\n  \"createdAt\": \"2026-04-17T20:24:58.279Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register User — Duplicate (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"email\": \"other@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          },
+          "response": [
+            {
+              "name": "409 Conflict",
+              "status": "Conflict",
+              "code": 409,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"error\": \"Username already taken\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "[\n  {\n    \"id\": 1,\n    \"username\": \"alice\",\n    \"email\": \"alice@example.com\",\n    \"createdAt\": \"2026-04-17T20:24:58.263Z\",\n    \"followersCount\": 1,\n    \"followingCount\": 1\n  },\n  {\n    \"id\": 2,\n    \"username\": \"bob\",\n    \"email\": \"bob@example.com\",\n    \"createdAt\": \"2026-04-17T20:24:58.270Z\",\n    \"followersCount\": 1,\n    \"followingCount\": 1\n  },\n  {\n    \"id\": 3,\n    \"username\": \"charlie\",\n    \"email\": \"charlie@example.com\",\n    \"createdAt\": \"2026-04-17T20:24:58.279Z\",\n    \"followersCount\": 0,\n    \"followingCount\": 0\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users", "1"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 1,\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"createdAt\": \"2026-04-17T20:24:58.263Z\",\n  \"followersCount\": 1,\n  \"followingCount\": 1,\n  \"posts\": [\n    {\n      \"id\": 1,\n      \"userId\": 1,\n      \"content\": \"Hello Twitter world! Just started learning Node.js #CSE341\",\n      \"createdAt\": \"2026-04-17T20:24:58.297Z\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Follow",
+      "item": [
+        {
+          "name": "Follow User (Alice → Bob)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"followerId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/2/follow", "host": ["{{baseUrl}}"], "path": ["users", "2", "follow"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"message\": \"User 1 now follows user 2\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Follow User (Bob → Alice)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"followerId\": 2\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/1/follow", "host": ["{{baseUrl}}"], "path": ["users", "1", "follow"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"message\": \"User 2 now follows user 1\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unfollow User (Alice ↛ Charlie)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"followerId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/3/follow", "host": ["{{baseUrl}}"], "path": ["users", "3", "follow"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"message\": \"User 1 unfollowed user 3\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Create Post — Alice",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"content\": \"Hello Twitter world! Just started learning Node.js #CSE341\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"content\": \"Hello Twitter world! Just started learning Node.js #CSE341\",\n  \"createdAt\": \"2026-04-17T20:24:58.297Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Post — Bob",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 2,\n  \"content\": \"Express makes building REST APIs so easy! 🚀\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 2,\n  \"userId\": 2,\n  \"content\": \"Express makes building REST APIs so easy! 🚀\",\n  \"createdAt\": \"2026-04-17T20:24:58.304Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Post — Charlie",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"content\": \"Node.js event loop is mind-blowing, single-threaded but handles thousands of requests!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 3,\n  \"userId\": 3,\n  \"content\": \"Node.js event loop is mind-blowing, single-threaded but handles thousands of requests!\",\n  \"createdAt\": \"2026-04-17T20:24:58.310Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Posts",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "[\n  {\n    \"id\": 1,\n    \"userId\": 1,\n    \"content\": \"Hello Twitter world! Just started learning Node.js #CSE341\",\n    \"createdAt\": \"2026-04-17T20:24:58.297Z\",\n    \"author\": \"alice\",\n    \"likesCount\": 1,\n    \"commentsCount\": 2\n  },\n  {\n    \"id\": 2,\n    \"userId\": 2,\n    \"content\": \"Express makes building REST APIs so easy! 🚀\",\n    \"createdAt\": \"2026-04-17T20:24:58.304Z\",\n    \"author\": \"bob\",\n    \"likesCount\": 1,\n    \"commentsCount\": 0\n  },\n  {\n    \"id\": 3,\n    \"userId\": 3,\n    \"content\": \"Node.js event loop is mind-blowing, single-threaded but handles thousands of requests!\",\n    \"createdAt\": \"2026-04-17T20:24:58.310Z\",\n    \"author\": \"charlie\",\n    \"likesCount\": 0,\n    \"commentsCount\": 0\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/posts/1", "host": ["{{baseUrl}}"], "path": ["posts", "1"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"content\": \"Hello Twitter world! Just started learning Node.js #CSE341\",\n  \"createdAt\": \"2026-04-17T20:24:58.297Z\",\n  \"author\": \"alice\",\n  \"likesCount\": 1,\n  \"commentsCount\": 2\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/posts/4", "host": ["{{baseUrl}}"], "path": ["posts", "4"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"message\": \"Post deleted\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Post — Not Found (404)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts/99/like", "host": ["{{baseUrl}}"], "path": ["posts", "99", "like"] }
+          },
+          "response": [
+            {
+              "name": "404 Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"error\": \"Post not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Likes",
+      "item": [
+        {
+          "name": "Like Post (Bob likes Post 1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 2\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts/1/like", "host": ["{{baseUrl}}"], "path": ["posts", "1", "like"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"message\": \"Post liked\",\n  \"likesCount\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Like Post (Charlie likes Post 1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts/1/like", "host": ["{{baseUrl}}"], "path": ["posts", "1", "like"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"message\": \"Post liked\",\n  \"likesCount\": 2\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unlike Post (Charlie unlikes Post 1)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts/1/like", "host": ["{{baseUrl}}"], "path": ["posts", "1", "like"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"message\": \"Post unliked\",\n  \"likesCount\": 1\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Add Comment (Bob on Post 1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 2,\n  \"content\": \"Great post Alice! Keep it up!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts/1/comments", "host": ["{{baseUrl}}"], "path": ["posts", "1", "comments"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 1,\n  \"postId\": 1,\n  \"userId\": 2,\n  \"content\": \"Great post Alice! Keep it up!\",\n  \"createdAt\": \"2026-04-17T20:24:58.356Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add Comment (Charlie on Post 1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"content\": \"Totally agree, Node.js is awesome!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts/1/comments", "host": ["{{baseUrl}}"], "path": ["posts", "1", "comments"] }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "{\n  \"id\": 2,\n  \"postId\": 1,\n  \"userId\": 3,\n  \"content\": \"Totally agree, Node.js is awesome!\",\n  \"createdAt\": \"2026-04-17T20:24:58.362Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Comments for Post 1",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/posts/1/comments", "host": ["{{baseUrl}}"], "path": ["posts", "1", "comments"] }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "body": "[\n  {\n    \"id\": 1,\n    \"postId\": 1,\n    \"userId\": 2,\n    \"content\": \"Great post Alice! Keep it up!\",\n    \"createdAt\": \"2026-04-17T20:24:58.356Z\",\n    \"author\": \"bob\"\n  },\n  {\n    \"id\": 2,\n    \"postId\": 1,\n    \"userId\": 3,\n    \"content\": \"Totally agree, Node.js is awesome!\",\n    \"createdAt\": \"2026-04-17T20:24:58.362Z\",\n    \"author\": \"charlie\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

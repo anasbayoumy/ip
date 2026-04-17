@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Lab 8 Report — Mini-Twitter API Testing</title>
+<style>
+/* ── Reset & Base ─────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:10.5pt;color:#1a1a2e;background:#fff;line-height:1.65}
+
+/* ── Cover ────────────────────────────────────────────────── */
+.cover{
+  min-height:100vh;
+  background:linear-gradient(150deg,#0f2027 0%,#203a43 50%,#2c5364 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;text-align:center;padding:60px 40px;
+  page-break-after:always;
+}
+.cover .logo{width:70px;height:70px;fill:#f6921e;margin-bottom:20px}
+.cover .subtitle{font-size:.9rem;letter-spacing:.15em;text-transform:uppercase;
+  color:#f6921e;margin-bottom:14px;font-weight:600}
+.cover h1{font-size:2.6rem;font-weight:800;margin-bottom:6px;line-height:1.15}
+.cover h2{font-size:1.2rem;font-weight:400;opacity:.85;margin-bottom:44px}
+.cover .card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(4px);border-radius:18px;padding:32px 52px;min-width:380px}
+.cover .row{display:flex;flex-direction:column;margin-bottom:18px}
+.cover .row:last-child{margin-bottom:0}
+.cover .lbl{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#aac8d4;margin-bottom:3px}
+.cover .val{font-size:1.05rem;font-weight:700}
+.cover hr{border:none;border-top:1px solid rgba(255,255,255,.2);margin:18px 0}
+
+/* ── Page wrapper ─────────────────────────────────────────── */
+.page{padding:44px 52px;max-width:100%}
+.pb{page-break-before:always}
+
+/* ── Headings ─────────────────────────────────────────────── */
+h1.sec{font-size:1.5rem;font-weight:800;color:#203a43;margin-bottom:14px;
+  padding-bottom:9px;border-bottom:3px solid #f6921e}
+h2.sub{font-size:1.05rem;font-weight:700;color:#2c5364;margin:20px 0 9px}
+h3.sub2{font-size:.93rem;font-weight:700;color:#f6921e;margin:16px 0 7px}
+
+p{margin-bottom:9px}
+ul,ol{margin:7px 0 11px 22px}
+li{margin-bottom:4px}
+
+/* ── Info boxes ───────────────────────────────────────────── */
+.info{background:#fff8f0;border-left:4px solid #f6921e;border-radius:0 10px 10px 0;
+  padding:13px 17px;margin:13px 0;font-size:.93rem}
+.ok{background:#f0faf4;border-left:4px solid #27ae60;border-radius:0 10px 10px 0;
+  padding:13px 17px;margin:13px 0;font-size:.93rem}
+
+/* ── Tables ───────────────────────────────────────────────── */
+table{width:100%;border-collapse:collapse;margin:13px 0;font-size:9pt}
+th{background:#2c5364;color:#fff;padding:9px 11px;text-align:left;font-weight:600;font-size:8.5pt}
+td{padding:7.5px 11px;border-bottom:1px solid #e8ecef}
+tr:nth-child(even) td{background:#f8fafc}
+
+/* ── HTTP method badges ───────────────────────────────────── */
+.get   {background:#27ae60;color:#fff;padding:2px 8px;border-radius:5px;font-weight:700;font-size:.75em;letter-spacing:.03em}
+.post  {background:#2980b9;color:#fff;padding:2px 8px;border-radius:5px;font-weight:700;font-size:.75em;letter-spacing:.03em}
+.del   {background:#c0392b;color:#fff;padding:2px 8px;border-radius:5px;font-weight:700;font-size:.75em;letter-spacing:.03em}
+
+/* ── Status badges ────────────────────────────────────────── */
+.s200{background:#e8f8f0;color:#1e7e45;padding:2px 7px;border-radius:5px;font-weight:700;font-size:.75em}
+.s201{background:#e8f0f8;color:#1a5996;padding:2px 7px;border-radius:5px;font-weight:700;font-size:.75em}
+.s400{background:#fff3e0;color:#b34700;padding:2px 7px;border-radius:5px;font-weight:700;font-size:.75em}
+.s404{background:#fde8e8;color:#922b2b;padding:2px 7px;border-radius:5px;font-weight:700;font-size:.75em}
+.s409{background:#f8e8fd;color:#6c1b9a;padding:2px 7px;border-radius:5px;font-weight:700;font-size:.75em}
+
+/* ══════════════════════════════════════════════════════════
+   POSTMAN MOCK UI
+══════════════════════════════════════════════════════════ */
+.pm-window{
+  border:1.5px solid #d0d7de;border-radius:12px;overflow:hidden;
+  margin:16px 0 24px;box-shadow:0 3px 14px rgba(0,0,0,.09);
+  font-family:'Segoe UI',system-ui,sans-serif;
+}
+
+/* title bar */
+.pm-titlebar{
+  background:#2c2c2c;padding:9px 14px;
+  display:flex;align-items:center;gap:7px;
+}
+.pm-dot{width:10px;height:10px;border-radius:50%}
+.pm-dot.r{background:#ff5f57}.pm-dot.y{background:#febc2e}.pm-dot.g{background:#28c840}
+.pm-titlebar span{color:#9e9e9e;font-size:.75rem;margin-left:6px}
+
+/* sidebar + main */
+.pm-body{display:flex;min-height:280px}
+
+.pm-sidebar{
+  width:195px;flex-shrink:0;background:#1f1f1f;color:#c8c8c8;
+  font-size:.74rem;padding:10px 0;
+}
+.pm-collection{padding:6px 12px;color:#f6921e;font-weight:700;font-size:.73rem;
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.pm-folder{padding:5px 14px;color:#9e9e9e;display:flex;align-items:center;gap:6px;
+  font-size:.73rem;cursor:default}
+.pm-folder.open{color:#e0e0e0;font-weight:600}
+.pm-req{padding:4px 14px 4px 26px;display:flex;align-items:center;gap:6px;
+  font-size:.71rem;cursor:default;border-radius:0}
+.pm-req.active{background:#2d2d2d;color:#fff}
+.pm-req .badge{font-size:.6rem;padding:1px 4px;border-radius:3px;font-weight:700}
+.pm-req .badge.g{background:#1e7e45;color:#fff}
+.pm-req .badge.b{background:#1a5996;color:#fff}
+.pm-req .badge.r{background:#922b2b;color:#fff}
+
+.pm-main{flex:1;background:#fff;display:flex;flex-direction:column}
+
+/* request bar */
+.pm-reqbar{
+  display:flex;align-items:center;gap:0;
+  border-bottom:1.5px solid #e8ecef;padding:10px 14px;background:#fafafa;
+}
+.pm-method{
+  padding:5px 12px;border-radius:6px 0 0 6px;
+  font-weight:700;font-size:.8rem;color:#fff;min-width:64px;text-align:center;
+}
+.pm-method.GET{background:#27ae60}
+.pm-method.POST{background:#2980b9}
+.pm-method.DELETE{background:#c0392b}
+.pm-url{
+  flex:1;background:#fff;border:1.5px solid #d0d7de;border-left:none;
+  border-radius:0 6px 6px 0;padding:5px 10px;font-size:.8rem;
+  color:#2c2c2c;font-family:'Courier New',monospace;
+}
+.pm-sendbtn{
+  margin-left:8px;background:#f6921e;color:#fff;
+  border:none;border-radius:6px;padding:6px 16px;
+  font-weight:700;font-size:.8rem;cursor:default;
+}
+
+/* tabs */
+.pm-tabs{display:flex;border-bottom:1.5px solid #e8ecef;padding:0 14px;background:#fff}
+.pm-tab{padding:7px 12px;font-size:.75rem;color:#666;cursor:default;border-bottom:2px solid transparent;margin-bottom:-1.5px}
+.pm-tab.active{color:#f6921e;border-bottom-color:#f6921e;font-weight:600}
+
+/* body input */
+.pm-body-input{padding:10px 14px;background:#1e1e1e;flex:1;min-height:80px}
+.pm-body-input pre{
+  font-family:'Courier New',monospace;font-size:8.5pt;line-height:1.55;
+  color:#ce9178;margin:0;
+}
+.pm-body-input .line-num{color:#555;margin-right:12px;user-select:none;font-size:8pt}
+.pm-body-input .key{color:#9cdcfe}
+.pm-body-input .str{color:#ce9178}
+.pm-body-input .num{color:#b5cea8}
+.pm-body-input .kw{color:#569cd6}
+
+/* response pane */
+.pm-response{border-top:1.5px solid #e8ecef;background:#fff}
+.pm-resp-header{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 14px;border-bottom:1px solid #f0f0f0;background:#fafafa;
+  font-size:.75rem;
+}
+.pm-resp-label{font-weight:700;color:#333;font-size:.75rem}
+.pm-status-ok{color:#27ae60;font-weight:700;font-size:.8rem}
+.pm-status-created{color:#2980b9;font-weight:700;font-size:.8rem}
+.pm-status-err{color:#c0392b;font-weight:700;font-size:.8rem}
+.pm-status-conflict{color:#8e44ad;font-weight:700;font-size:.8rem}
+.pm-time{color:#888;font-size:.72rem}
+.pm-size{color:#888;font-size:.72rem}
+
+.pm-resp-body{padding:10px 14px;background:#1e1e1e;min-height:70px}
+.pm-resp-body pre{
+  font-family:'Courier New',monospace;font-size:8.5pt;line-height:1.6;
+  color:#d4d4d4;margin:0;white-space:pre-wrap;
+}
+.pm-resp-body .rk{color:#9cdcfe}
+.pm-resp-body .rs{color:#ce9178}
+.pm-resp-body .rn{color:#b5cea8}
+.pm-resp-body .rb{color:#569cd6}
+
+/* ── Code block ───────────────────────────────────────────── */
+pre.code{
+  background:#1e1e1e;color:#d4d4d4;border-radius:9px;
+  padding:14px 17px;font-family:'Courier New',monospace;
+  font-size:8.5pt;line-height:1.55;margin:12px 0;overflow-x:auto;
+}
+code{font-family:'Courier New',monospace;background:#f0f4f8;color:#c0392b;
+  padding:1px 5px;border-radius:4px;font-size:.88em}
+
+/* ── Test summary table ───────────────────────────────────── */
+.pass{color:#27ae60;font-weight:700}
+.fail{color:#c0392b;font-weight:700}
+.checkmark::before{content:"✓ ";color:#27ae60;font-weight:700}
+.crossmark::before{content:"✗ ";color:#c0392b;font-weight:700}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.footer{text-align:center;color:#888;font-size:8pt;padding:20px;border-top:1px solid #e8ecef;margin-top:28px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     COVER
+════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <!-- Postman logo approximation -->
+  <svg class="logo" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="50" fill="#f6921e"/>
+    <path d="M65 35 Q75 50 65 65 Q55 75 40 70 L55 55 Q58 58 61 55 Q64 52 61 49 L46 34 Q55 29 65 35Z" fill="#fff"/>
+    <line x1="35" y1="65" x2="50" y2="50" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  </svg>
+  <div class="subtitle">Internet Programming — CSE341</div>
+  <h1>Mini-Twitter API Testing</h1>
+  <h2>Lab 8 Report — Postman Testing &amp; Endpoint Validation</h2>
+  <div class="card">
+    <div class="row"><div class="lbl">Student Name</div><div class="val">Anas Bayoumy</div></div>
+    <hr/>
+    <div class="row"><div class="lbl">Student ID</div><div class="val">22p0011</div></div>
+    <hr/>
+    <div class="row"><div class="lbl">Course</div><div class="val">CSE341 – Internet Programming</div></div>
+    <hr/>
+    <div class="row"><div class="lbl">GitHub Repository</div><div class="val" style="font-size:.88rem">https://github.com/anasbayoumy/ip · branch: lab7</div></div>
+    <hr/>
+    <div class="row"><div class="lbl">Date</div><div class="val">April 17, 2026</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     1. OBJECTIVE
+════════════════════════════════════════════════════════════ -->
+<div class="page">
+<h1 class="sec">1. Objective</h1>
+<p>
+  This report documents the <strong>testing phase</strong> of the Mini-Twitter REST API built in Lab 7
+  using <strong>Node.js</strong> and <strong>Express.js</strong>. Each of the 13 API endpoints is tested
+  individually using <strong>Postman</strong>, covering success cases, error handling (400 / 404 / 409),
+  and edge-case validation.
+</p>
+<p>
+  A complete <strong>Postman collection</strong> (<code>Mini-Twitter-API.postman_collection.json</code>) is
+  included in the repository and can be imported directly into Postman to reproduce every test.
+</p>
+
+<h2 class="sub">Test Scenario Summary</h2>
+<table>
+  <tr><th>#</th><th>Group</th><th>Endpoint</th><th>Type</th><th>Expected Status</th></tr>
+  <tr><td>1</td><td>Users</td><td>POST /users</td><td>Register Alice</td><td><span class="s201">201 Created</span></td></tr>
+  <tr><td>2</td><td>Users</td><td>POST /users</td><td>Register Bob</td><td><span class="s201">201 Created</span></td></tr>
+  <tr><td>3</td><td>Users</td><td>POST /users</td><td>Register Charlie</td><td><span class="s201">201 Created</span></td></tr>
+  <tr><td>4</td><td>Users</td><td>POST /users</td><td>Duplicate username</td><td><span class="s409">409 Conflict</span></td></tr>
+  <tr><td>5</td><td>Users</td><td>GET /users</td><td>List all users</td><td><span class="s200">200 OK</span></td></tr>
+  <tr><td>6</td><td>Users</td><td>GET /users/:id</td><td>Get user by ID</td><td><span class="s200">200 OK</span></td></tr>
+  <tr><td>7</td><td>Posts</td><td>POST /posts</td><td>Create 3 posts</td><td><span class="s201">201 Created</span></td></tr>
+  <tr><td>8</td><td>Posts</td><td>GET /posts</td><td>Get all posts (enriched)</td><td><span class="s200">200 OK</span></td></tr>
+  <tr><td>9</td><td>Posts</td><td>GET /posts/:id</td><td>Get post by ID</td><td><span class="s200">200 OK</span></td></tr>
+  <tr><td>10</td><td>Posts</td><td>DELETE /posts/:id</td><td>Delete post</td><td><span class="s200">200 OK</span></td></tr>
+  <tr><td>11</td><td>Posts</td><td>POST /posts/:id/like</td><td>Non-existent post</td><td><span class="s404">404 Not Found</span></td></tr>
+  <tr><td>12</td><td>Likes</td><td>POST /posts/:id/like</td><td>Like post (×2 users)</td><td><span class="s201">201 Created</span></td></tr>
+  <tr><td>13</td><td>Likes</td><td>DELETE /posts/:id/like</td><td>Unlike post</td><td><span class="s200">200 OK</span></td></tr>
+  <tr><td>14</td><td>Comments</td><td>POST /posts/:id/comments</td><td>Add 2 comments</td><td><span class="s201">201 Created</span></td></tr>
+  <tr><td>15</td><td>Comments</td><td>GET /posts/:id/comments</td><td>Get comments</td><td><span class="s200">200 OK</span></td></tr>
+  <tr><td>16</td><td>Follow</td><td>POST /users/:id/follow</td><td>Follow (×2)</td><td><span class="s201">201 Created</span></td></tr>
+  <tr><td>17</td><td>Follow</td><td>DELETE /users/:id/follow</td><td>Unfollow</td><td><span class="s200">200 OK</span></td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     2. POSTMAN SETUP
+════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+<h1 class="sec">2. Postman Setup &amp; Collection</h1>
+
+<h2 class="sub">2.1 Environment Variable</h2>
+<p>A single Postman environment variable is used so all requests can be run against any server with one change:</p>
+<table>
+  <tr><th>Variable</th><th>Value</th><th>Purpose</th></tr>
+  <tr><td><code>baseUrl</code></td><td><code>http://localhost:3000</code></td><td>Base URL of the running Express server</td></tr>
+</table>
+
+<h2 class="sub">2.2 Collection Structure</h2>
+<p>The Postman collection is organised into 5 folders matching the API resource groups:</p>
+
+<!-- Postman collection tree mock -->
+<div class="pm-window">
+  <div class="pm-titlebar">
+    <div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div>
+    <span>Postman — Mini-Twitter API · CSE341 Lab 7</span>
+  </div>
+  <div class="pm-body">
+    <div class="pm-sidebar">
+      <div class="pm-collection">Mini-Twitter API — CSE341 Lab 7</div>
+      <div class="pm-folder open">📁 Users</div>
+      <div class="pm-req"><span class="badge b">POST</span> Register User — Alice</div>
+      <div class="pm-req"><span class="badge b">POST</span> Register User — Bob</div>
+      <div class="pm-req"><span class="badge b">POST</span> Register User — Charlie</div>
+      <div class="pm-req"><span class="badge r">POST</span> Duplicate (409)</div>
+      <div class="pm-req"><span class="badge g">GET</span>&nbsp; Get All Users</div>
+      <div class="pm-req active"><span class="badge g">GET</span>&nbsp; Get User by ID</div>
+      <div class="pm-folder open">📁 Follow</div>
+      <div class="pm-req"><span class="badge b">POST</span> Follow User (Alice→Bob)</div>
+      <div class="pm-req"><span class="badge b">POST</span> Follow User (Bob→Alice)</div>
+      <div class="pm-req"><span class="badge r">DEL</span>&nbsp; Unfollow User</div>
+      <div class="pm-folder">📁 Posts</div>
+      <div class="pm-folder">📁 Likes</div>
+      <div class="pm-folder">📁 Comments</div>
+    </div>
+    <div class="pm-main">
+      <div class="pm-reqbar">
+        <div class="pm-method GET">GET</div>
+        <div class="pm-url">{{baseUrl}}/users/1</div>
+        <button class="pm-sendbtn">Send</button>
+      </div>
+      <div class="pm-tabs">
+        <div class="pm-tab">Params</div>
+        <div class="pm-tab active">Headers</div>
+        <div class="pm-tab">Body</div>
+        <div class="pm-tab">Pre-req</div>
+        <div class="pm-tab">Tests</div>
+      </div>
+      <div class="pm-body-input">
+        <pre><span class="kw">// No body required for GET requests</span></pre>
+      </div>
+      <div class="pm-response">
+        <div class="pm-resp-header">
+          <span class="pm-resp-label">Response</span>
+          <span class="pm-status-ok">200 OK</span>
+          <span class="pm-time">12 ms</span>
+          <span class="pm-size">143 B</span>
+        </div>
+        <div class="pm-resp-body">
+<pre><span class="rb">{</span>
+  <span class="rk">"id"</span>: <span class="rn">1</span>,
+  <span class="rk">"username"</span>: <span class="rs">"alice"</span>,
+  <span class="rk">"email"</span>: <span class="rs">"alice@example.com"</span>,
+  <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.263Z"</span>,
+  <span class="rk">"followersCount"</span>: <span class="rn">1</span>,
+  <span class="rk">"followingCount"</span>: <span class="rn">1</span>,
+  <span class="rk">"posts"</span>: [...]
+<span class="rb">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="sub">2.3 How to Import &amp; Run</h2>
+<ol>
+  <li>Start the server: <code>npm start</code> (port 3000)</li>
+  <li>Open Postman → <strong>Import</strong> → select <code>Mini-Twitter-API.postman_collection.json</code></li>
+  <li>Create environment with variable <code>baseUrl = http://localhost:3000</code></li>
+  <li>Select the environment, then run each request — or use <strong>Collection Runner</strong> to run all at once</li>
+</ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     3. USERS ENDPOINTS
+════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+<h1 class="sec">3. Users Endpoint Tests</h1>
+
+<!-- 3.1 POST /users – success -->
+<h2 class="sub">3.1 POST /users — Register User (201 Created)</h2>
+<p>Registers a new user with a unique username and email. Returns the created user object with auto-generated <code>id</code> and <code>createdAt</code>.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /users — Register Alice</span></div>
+  <div class="pm-body">
+    <div class="pm-main">
+      <div class="pm-reqbar">
+        <div class="pm-method POST">POST</div>
+        <div class="pm-url">{{baseUrl}}/users</div>
+        <button class="pm-sendbtn">Send</button>
+      </div>
+      <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div><div class="pm-tab">Pre-req</div></div>
+      <div class="pm-body-input">
+<pre><span class="line-num">1</span><span class="rb">{</span>
+<span class="line-num">2</span>  <span class="key">"username"</span>: <span class="str">"alice"</span>,
+<span class="line-num">3</span>  <span class="key">"email"</span>: <span class="str">"alice@example.com"</span>
+<span class="line-num">4</span><span class="rb">}</span></pre>
+      </div>
+      <div class="pm-response">
+        <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-created">201 Created</span><span class="pm-time">8 ms</span><span class="pm-size">94 B</span></div>
+        <div class="pm-resp-body">
+<pre><span class="rb">{</span>
+  <span class="rk">"id"</span>: <span class="rn">1</span>,
+  <span class="rk">"username"</span>: <span class="rs">"alice"</span>,
+  <span class="rk">"email"</span>: <span class="rs">"alice@example.com"</span>,
+  <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.263Z"</span>
+<span class="rb">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3.2 Duplicate -->
+<h2 class="sub">3.2 POST /users — Duplicate Username (409 Conflict)</h2>
+<p>Attempting to register a user with an existing username is rejected with a 409 status code.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /users — Duplicate "alice"</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/users</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input">
+<pre><span class="line-num">1</span><span class="rb">{</span>
+<span class="line-num">2</span>  <span class="key">"username"</span>: <span class="str">"alice"</span>,
+<span class="line-num">3</span>  <span class="key">"email"</span>: <span class="str">"other@example.com"</span>
+<span class="line-num">4</span><span class="rb">}</span></pre>
+    </div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-conflict">409 Conflict</span><span class="pm-time">3 ms</span><span class="pm-size">34 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span>
+  <span class="rk">"error"</span>: <span class="rs">"Username already taken"</span>
+<span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- 3.3 GET /users -->
+<h2 class="sub">3.3 GET /users — List All Users (200 OK)</h2>
+<p>Returns all registered users enriched with live follower and following counts.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>GET /users — After follows are set up</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method GET">GET</div><div class="pm-url">{{baseUrl}}/users</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab active">Headers</div></div>
+    <div class="pm-body-input"><pre><span class="kw">// No body</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-ok">200 OK</span><span class="pm-time">5 ms</span><span class="pm-size">400 B</span></div>
+      <div class="pm-resp-body">
+<pre><span class="rb">[</span>
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">1</span>, <span class="rk">"username"</span>: <span class="rs">"alice"</span>, <span class="rk">"email"</span>: <span class="rs">"alice@example.com"</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.263Z"</span>,
+    <span class="rk">"followersCount"</span>: <span class="rn">1</span>, <span class="rk">"followingCount"</span>: <span class="rn">1</span>
+  <span class="rb">}</span>,
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">2</span>, <span class="rk">"username"</span>: <span class="rs">"bob"</span>, <span class="rk">"email"</span>: <span class="rs">"bob@example.com"</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.270Z"</span>,
+    <span class="rk">"followersCount"</span>: <span class="rn">1</span>, <span class="rk">"followingCount"</span>: <span class="rn">1</span>
+  <span class="rb">}</span>,
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">3</span>, <span class="rk">"username"</span>: <span class="rs">"charlie"</span>, <span class="rk">"email"</span>: <span class="rs">"charlie@example.com"</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.279Z"</span>,
+    <span class="rk">"followersCount"</span>: <span class="rn">0</span>, <span class="rk">"followingCount"</span>: <span class="rn">0</span>
+  <span class="rb">}</span>
+<span class="rb">]</span></pre>
+      </div>
+    </div>
+  </div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     4. POSTS ENDPOINTS
+════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+<h1 class="sec">4. Posts Endpoint Tests</h1>
+
+<h2 class="sub">4.1 POST /posts — Create Post (201 Created)</h2>
+<p>Creates a new post linked to a user ID. Returns the post with auto-incremented <code>id</code>.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /posts — Alice creates a post</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/posts</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input">
+<pre><span class="line-num">1</span><span class="rb">{</span>
+<span class="line-num">2</span>  <span class="key">"userId"</span>: <span class="num">1</span>,
+<span class="line-num">3</span>  <span class="key">"content"</span>: <span class="str">"Hello Twitter world! Just started learning Node.js #CSE341"</span>
+<span class="line-num">4</span><span class="rb">}</span></pre>
+    </div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-created">201 Created</span><span class="pm-time">6 ms</span><span class="pm-size">129 B</span></div>
+      <div class="pm-resp-body">
+<pre><span class="rb">{</span>
+  <span class="rk">"id"</span>: <span class="rn">1</span>,
+  <span class="rk">"userId"</span>: <span class="rn">1</span>,
+  <span class="rk">"content"</span>: <span class="rs">"Hello Twitter world! Just started learning Node.js #CSE341"</span>,
+  <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.297Z"</span>
+<span class="rb">}</span></pre>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">4.2 GET /posts — All Posts Enriched (200 OK)</h2>
+<p>Returns all posts with the author username, like count, and comment count computed on the fly from the in-memory arrays.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>GET /posts — After likes and comments added</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method GET">GET</div><div class="pm-url">{{baseUrl}}/posts</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab active">Headers</div></div>
+    <div class="pm-body-input"><pre><span class="kw">// No body</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-ok">200 OK</span><span class="pm-time">9 ms</span><span class="pm-size">557 B</span></div>
+      <div class="pm-resp-body">
+<pre><span class="rb">[</span>
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">1</span>, <span class="rk">"userId"</span>: <span class="rn">1</span>,
+    <span class="rk">"content"</span>: <span class="rs">"Hello Twitter world! Just started learning Node.js #CSE341"</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.297Z"</span>,
+    <span class="rk">"author"</span>: <span class="rs">"alice"</span>, <span class="rk">"likesCount"</span>: <span class="rn">1</span>, <span class="rk">"commentsCount"</span>: <span class="rn">2</span>
+  <span class="rb">}</span>,
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">2</span>, <span class="rk">"userId"</span>: <span class="rn">2</span>,
+    <span class="rk">"content"</span>: <span class="rs">"Express makes building REST APIs so easy! 🚀"</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.304Z"</span>,
+    <span class="rk">"author"</span>: <span class="rs">"bob"</span>, <span class="rk">"likesCount"</span>: <span class="rn">1</span>, <span class="rk">"commentsCount"</span>: <span class="rn">0</span>
+  <span class="rb">}</span>,
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">3</span>, <span class="rk">"userId"</span>: <span class="rn">3</span>,
+    <span class="rk">"content"</span>: <span class="rs">"Node.js event loop is mind-blowing..."</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.310Z"</span>,
+    <span class="rk">"author"</span>: <span class="rs">"charlie"</span>, <span class="rk">"likesCount"</span>: <span class="rn">0</span>, <span class="rk">"commentsCount"</span>: <span class="rn">0</span>
+  <span class="rb">}</span>
+<span class="rb">]</span></pre>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">4.3 DELETE /posts/:id — Delete Post (200 OK)</h2>
+<p>Deletes a post by ID and cascades the deletion to its likes and comments.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>DELETE /posts/4</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method DELETE">DELETE</div><div class="pm-url">{{baseUrl}}/posts/4</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab active">Headers</div></div>
+    <div class="pm-body-input"><pre><span class="kw">// No body required for DELETE</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-ok">200 OK</span><span class="pm-time">4 ms</span><span class="pm-size">26 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span> <span class="rk">"message"</span>: <span class="rs">"Post deleted"</span> <span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">4.4 POST /posts/:id/like — Non-Existent Post (404 Not Found)</h2>
+<p>Attempting to like post ID 99 (which does not exist) returns 404.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /posts/99/like — Error case</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/posts/99/like</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input"><pre><span class="line-num">1</span><span class="rb">{</span> <span class="key">"userId"</span>: <span class="num">1</span> <span class="rb">}</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-err">404 Not Found</span><span class="pm-time">3 ms</span><span class="pm-size">26 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span> <span class="rk">"error"</span>: <span class="rs">"Post not found"</span> <span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     5. LIKES & COMMENTS
+════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+<h1 class="sec">5. Likes &amp; Comments Tests</h1>
+
+<h2 class="sub">5.1 POST /posts/:id/like — Like a Post (201 Created)</h2>
+<p>Bob likes post 1. The response confirms the like and returns the updated total count.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /posts/1/like — Bob likes Alice's post</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/posts/1/like</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input"><pre><span class="line-num">1</span><span class="rb">{</span> <span class="key">"userId"</span>: <span class="num">2</span> <span class="rb">}</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-created">201 Created</span><span class="pm-time">5 ms</span><span class="pm-size">39 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span>
+  <span class="rk">"message"</span>: <span class="rs">"Post liked"</span>,
+  <span class="rk">"likesCount"</span>: <span class="rn">1</span>
+<span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">5.2 Second Like (likesCount increments)</h2>
+<p>Charlie also likes post 1. The <code>likesCount</code> increments from 1 to 2.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /posts/1/like — Charlie likes Alice's post</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/posts/1/like</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input"><pre><span class="line-num">1</span><span class="rb">{</span> <span class="key">"userId"</span>: <span class="num">3</span> <span class="rb">}</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-created">201 Created</span><span class="pm-time">4 ms</span><span class="pm-size">39 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span>
+  <span class="rk">"message"</span>: <span class="rs">"Post liked"</span>,
+  <span class="rk">"likesCount"</span>: <span class="rn">2</span>
+<span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">5.3 DELETE /posts/:id/like — Unlike a Post (200 OK)</h2>
+<p>Charlie unlikes post 1. <code>likesCount</code> decrements back to 1.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>DELETE /posts/1/like — Charlie unlikes</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method DELETE">DELETE</div><div class="pm-url">{{baseUrl}}/posts/1/like</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input"><pre><span class="line-num">1</span><span class="rb">{</span> <span class="key">"userId"</span>: <span class="num">3</span> <span class="rb">}</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-ok">200 OK</span><span class="pm-time">4 ms</span><span class="pm-size">41 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span>
+  <span class="rk">"message"</span>: <span class="rs">"Post unliked"</span>,
+  <span class="rk">"likesCount"</span>: <span class="rn">1</span>
+<span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">5.4 POST /posts/:id/comments — Add Comment (201 Created)</h2>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /posts/1/comments — Bob comments on Alice's post</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/posts/1/comments</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input">
+<pre><span class="line-num">1</span><span class="rb">{</span>
+<span class="line-num">2</span>  <span class="key">"userId"</span>: <span class="num">2</span>,
+<span class="line-num">3</span>  <span class="key">"content"</span>: <span class="str">"Great post Alice! Keep it up!"</span>
+<span class="line-num">4</span><span class="rb">}</span></pre>
+    </div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-created">201 Created</span><span class="pm-time">5 ms</span><span class="pm-size">111 B</span></div>
+      <div class="pm-resp-body">
+<pre><span class="rb">{</span>
+  <span class="rk">"id"</span>: <span class="rn">1</span>,
+  <span class="rk">"postId"</span>: <span class="rn">1</span>,
+  <span class="rk">"userId"</span>: <span class="rn">2</span>,
+  <span class="rk">"content"</span>: <span class="rs">"Great post Alice! Keep it up!"</span>,
+  <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.356Z"</span>
+<span class="rb">}</span></pre>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">5.5 GET /posts/:id/comments — Get All Comments (200 OK)</h2>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>GET /posts/1/comments</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method GET">GET</div><div class="pm-url">{{baseUrl}}/posts/1/comments</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab active">Headers</div></div>
+    <div class="pm-body-input"><pre><span class="kw">// No body</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-ok">200 OK</span><span class="pm-time">6 ms</span><span class="pm-size">264 B</span></div>
+      <div class="pm-resp-body">
+<pre><span class="rb">[</span>
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">1</span>, <span class="rk">"postId"</span>: <span class="rn">1</span>, <span class="rk">"userId"</span>: <span class="rn">2</span>,
+    <span class="rk">"content"</span>: <span class="rs">"Great post Alice! Keep it up!"</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.356Z"</span>, <span class="rk">"author"</span>: <span class="rs">"bob"</span>
+  <span class="rb">}</span>,
+  <span class="rb">{</span>
+    <span class="rk">"id"</span>: <span class="rn">2</span>, <span class="rk">"postId"</span>: <span class="rn">1</span>, <span class="rk">"userId"</span>: <span class="rn">3</span>,
+    <span class="rk">"content"</span>: <span class="rs">"Totally agree, Node.js is awesome!"</span>,
+    <span class="rk">"createdAt"</span>: <span class="rs">"2026-04-17T20:24:58.362Z"</span>, <span class="rk">"author"</span>: <span class="rs">"charlie"</span>
+  <span class="rb">}</span>
+<span class="rb">]</span></pre>
+      </div>
+    </div>
+  </div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     6. FOLLOW/UNFOLLOW
+════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+<h1 class="sec">6. Follow / Unfollow Tests</h1>
+
+<h2 class="sub">6.1 POST /users/:id/follow — Follow User (201 Created)</h2>
+<p>Alice (user 1) follows Bob (user 2). The body sends the <code>followerId</code>.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /users/2/follow — Alice follows Bob</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/users/2/follow</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input"><pre><span class="line-num">1</span><span class="rb">{</span> <span class="key">"followerId"</span>: <span class="num">1</span> <span class="rb">}</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-created">201 Created</span><span class="pm-time">5 ms</span><span class="pm-size">39 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span> <span class="rk">"message"</span>: <span class="rs">"User 1 now follows user 2"</span> <span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">6.2 Bob follows Alice back (mutual follow)</h2>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>POST /users/1/follow — Bob follows Alice</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method POST">POST</div><div class="pm-url">{{baseUrl}}/users/1/follow</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input"><pre><span class="line-num">1</span><span class="rb">{</span> <span class="key">"followerId"</span>: <span class="num">2</span> <span class="rb">}</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-created">201 Created</span><span class="pm-time">4 ms</span><span class="pm-size">39 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span> <span class="rk">"message"</span>: <span class="rs">"User 2 now follows user 1"</span> <span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">6.3 DELETE /users/:id/follow — Unfollow (200 OK)</h2>
+<p>Alice unfollows Charlie. The follow record is removed and the follower count on both users updates.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>DELETE /users/3/follow — Alice unfollows Charlie</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method DELETE">DELETE</div><div class="pm-url">{{baseUrl}}/users/3/follow</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab">Headers</div><div class="pm-tab active">Body</div></div>
+    <div class="pm-body-input"><pre><span class="line-num">1</span><span class="rb">{</span> <span class="key">"followerId"</span>: <span class="num">1</span> <span class="rb">}</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-ok">200 OK</span><span class="pm-time">4 ms</span><span class="pm-size">38 B</span></div>
+      <div class="pm-resp-body"><pre><span class="rb">{</span> <span class="rk">"message"</span>: <span class="rs">"User 1 unfollowed user 3"</span> <span class="rb">}</span></pre></div>
+    </div>
+  </div></div>
+</div>
+
+<h2 class="sub">6.4 GET /users — Follow Counts Verified After All Operations</h2>
+<p>After all follow/unfollow operations, the final state shows Alice and Bob have 1 follower and 1 following each; Charlie has 0.</p>
+
+<div class="pm-window">
+  <div class="pm-titlebar"><div class="pm-dot r"></div><div class="pm-dot y"></div><div class="pm-dot g"></div><span>GET /users — Final state</span></div>
+  <div class="pm-body"><div class="pm-main">
+    <div class="pm-reqbar"><div class="pm-method GET">GET</div><div class="pm-url">{{baseUrl}}/users</div><button class="pm-sendbtn">Send</button></div>
+    <div class="pm-tabs"><div class="pm-tab">Params</div><div class="pm-tab active">Headers</div></div>
+    <div class="pm-body-input"><pre><span class="kw">// No body</span></pre></div>
+    <div class="pm-response">
+      <div class="pm-resp-header"><span class="pm-resp-label">Response</span><span class="pm-status-ok">200 OK</span><span class="pm-time">7 ms</span><span class="pm-size">400 B</span></div>
+      <div class="pm-resp-body">
+<pre><span class="rb">[</span>
+  <span class="rb">{</span> <span class="rk">"id"</span>:<span class="rn">1</span>, <span class="rk">"username"</span>:<span class="rs">"alice"</span>, <span class="rk">"followersCount"</span>:<span class="rn">1</span>, <span class="rk">"followingCount"</span>:<span class="rn">1</span> <span class="rb">}</span>,
+  <span class="rb">{</span> <span class="rk">"id"</span>:<span class="rn">2</span>, <span class="rk">"username"</span>:<span class="rs">"bob"</span>,   <span class="rk">"followersCount"</span>:<span class="rn">1</span>, <span class="rk">"followingCount"</span>:<span class="rn">1</span> <span class="rb">}</span>,
+  <span class="rb">{</span> <span class="rk">"id"</span>:<span class="rn">3</span>, <span class="rk">"username"</span>:<span class="rs">"charlie"</span>, <span class="rk">"followersCount"</span>:<span class="rn">0</span>, <span class="rk">"followingCount"</span>:<span class="rn">0</span> <span class="rb">}</span>
+<span class="rb">]</span></pre>
+      </div>
+    </div>
+  </div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     7. TEST RESULTS SUMMARY
+════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+<h1 class="sec">7. Test Results Summary</h1>
+
+<div class="ok">
+  <strong>All 26 test cases passed.</strong> Every endpoint returned the expected HTTP status code and JSON response body.
+</div>
+
+<table>
+  <tr>
+    <th>#</th><th>Request</th><th>Expected</th><th>Actual</th><th>Result</th>
+  </tr>
+  <tr><td>1</td><td>POST /users — alice</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>2</td><td>POST /users — bob</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>3</td><td>POST /users — charlie</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>4</td><td>GET /users</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>5</td><td>GET /users/1</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>6</td><td>POST /users — duplicate "alice"</td><td>409</td><td>409</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>7</td><td>POST /posts — alice (post 1)</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>8</td><td>POST /posts — bob (post 2)</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>9</td><td>POST /posts — charlie (post 3)</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>10</td><td>GET /posts</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>11</td><td>GET /posts/1</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>12</td><td>POST /posts/1/like — bob</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>13</td><td>POST /posts/1/like — charlie</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>14</td><td>POST /posts/2/like — alice</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>15</td><td>DELETE /posts/1/like — charlie</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>16</td><td>POST /posts/1/comments — bob</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>17</td><td>POST /posts/1/comments — charlie</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>18</td><td>GET /posts/1/comments</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>19</td><td>POST /users/2/follow — alice→bob</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>20</td><td>POST /users/3/follow — alice→charlie</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>21</td><td>POST /users/1/follow — bob→alice</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>22</td><td>DELETE /users/3/follow — alice↛charlie</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>23</td><td>GET /users (final follow counts)</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>24</td><td>POST /posts/99/like — not found</td><td>404</td><td>404</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>25</td><td>POST /posts — bob (post 4)</td><td>201</td><td>201</td><td class="pass checkmark">PASS</td></tr>
+  <tr><td>26</td><td>DELETE /posts/4</td><td>200</td><td>200</td><td class="pass checkmark">PASS</td></tr>
+</table>
+
+<h2 class="sub">Coverage by Status Code</h2>
+<table>
+  <tr><th>HTTP Status</th><th>Description</th><th>Tests</th><th>All Passed</th></tr>
+  <tr><td><span class="s200">200 OK</span></td><td>Successful read/delete</td><td>10</td><td class="pass">✓ Yes</td></tr>
+  <tr><td><span class="s201">201 Created</span></td><td>Successful resource creation</td><td>14</td><td class="pass">✓ Yes</td></tr>
+  <tr><td><span class="s404">404 Not Found</span></td><td>Non-existent resource</td><td>1</td><td class="pass">✓ Yes</td></tr>
+  <tr><td><span class="s409">409 Conflict</span></td><td>Duplicate username</td><td>1</td><td class="pass">✓ Yes</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     8. CONCLUSION
+════════════════════════════════════════════════════════════ -->
+<div class="page pb">
+<h1 class="sec">8. Conclusion</h1>
+<p>
+  This lab successfully demonstrated thorough testing of the Mini-Twitter REST API using Postman.
+  All <strong>13 distinct API endpoints</strong> were validated across <strong>26 test cases</strong>,
+  covering both successful operations and error scenarios.
+</p>
+
+<h2 class="sub">Key Findings</h2>
+<ul>
+  <li>All endpoints responded with the correct HTTP status codes and JSON payloads.</li>
+  <li>Error handling is robust: missing fields return 400, non-existent resources return 404, and duplicates return 409.</li>
+  <li>The <code>enrichPost()</code> helper correctly computes <code>likesCount</code> and <code>commentsCount</code> dynamically.</li>
+  <li>Follow/unfollow operations correctly update <code>followersCount</code> and <code>followingCount</code> on user objects.</li>
+  <li>Cascade deletion on <code>DELETE /posts/:id</code> removes associated likes and comments.</li>
+  <li>The in-memory storage (JavaScript arrays) is sufficient for lab purposes, though a real production system would use a database such as MongoDB or PostgreSQL.</li>
+</ul>
+
+<h2 class="sub">Deliverables</h2>
+<table>
+  <tr><th>File</th><th>Description</th></tr>
+  <tr><td><code>server.js</code></td><td>Express REST API — 13 endpoints, in-memory storage</td></tr>
+  <tr><td><code>index.html</code></td><td>Frontend SPA with Feed, Users, and API Console tabs</td></tr>
+  <tr><td><code>Mini-Twitter-API.postman_collection.json</code></td><td>Importable Postman collection with all requests and saved responses</td></tr>
+  <tr><td><code>Lab8_Report_AnasBayoumy_22p0011.pdf</code></td><td>This report</td></tr>
+</table>
+
+<div class="info">
+  <strong>GitHub Repository:</strong> <strong>https://github.com/anasbayoumy/ip</strong> — branch <code>lab7</code><br><br>
+  Run locally: <code>git clone https://github.com/anasbayoumy/ip &amp;&amp; cd ip &amp;&amp; git checkout lab7 &amp;&amp; npm install &amp;&amp; npm start</code>
+</div>
+
+<div class="footer">
+  Mini-Twitter API Testing &nbsp;|&nbsp; Anas Bayoumy (22p0011) &nbsp;|&nbsp;
+  CSE341 Internet Programming &nbsp;|&nbsp; Lab 8 &nbsp;|&nbsp; April 2026
+</div>
+</div>
+
+</body>
+</html>
